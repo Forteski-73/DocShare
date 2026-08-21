@@ -180,7 +180,7 @@ export function AppLayout() {
             onClick={() => navigate("/qualidade/formularios")}
           />
           <NavLink
-            label="Procedimentos internos"
+            label="Procedimentos Internos"
             active={location.pathname.startsWith("/qualidade/procedimentos-internos")}
             onClick={() => navigate("/qualidade/procedimentos-internos")}
           />
