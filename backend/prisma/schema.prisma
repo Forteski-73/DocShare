@@ -1,0 +1,247 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  READER
+  APPROVER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum LabelType {
+  PISO_LAMINADO
+  ACESSORIO
+  DOCUMENTO
+}
+
+enum QualityDocumentType {
+  FORMULARIO
+  PROCEDIMENTO_INTERNO
+}
+
+enum ApprovalStatus {
+  PENDENTE_APROVACAO
+  APROVADO
+  NAO_APROVADO
+}
+
+enum DocumentApprovalEventType {
+  SOLICITACAO
+  APROVACAO
+  REPROVACAO
+  REENVIO
+}
+
+enum EmailJobStatus {
+  PENDING
+  SENT
+  DEAD
+}
+
+model User {
+  id             String     @id @default(cuid())
+  badgeNumber    String     @unique
+  email          String     @unique
+  passwordHash   String?
+  role           Role       @default(READER)
+  status         UserStatus @default(PENDING)
+  avatarPath     String?
+  avatarMimeType String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  inviteTokens        InviteToken[]
+  passwordResetTokens PasswordResetToken[]
+  createdLabels       Label[]              @relation("LabelCreatedBy")
+  createdCategories   Category[]           @relation("CategoryCreatedBy")
+  uploadedDocuments   Document[]           @relation("DocumentUploadedBy")
+  uploadedQualityDocuments QualityDocument[] @relation("QualityDocumentUploadedBy")
+  approvalFlowsAsApprover   DocumentApprovalFlow[]          @relation("ApprovalFlowApprover")
+  approvalFlowsAsRequester  DocumentApprovalFlow[]          @relation("ApprovalFlowRequester")
+  approvalHistoryAsActor    DocumentApprovalHistoryEvent[]  @relation("ApprovalHistoryActor")
+  approvalHistoryAsApprover DocumentApprovalHistoryEvent[]  @relation("ApprovalHistoryApprover")
+  activityLogs        ActivityLog[]
+}
+
+model InviteToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Label {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  type          LabelType @default(PISO_LAMINADO)
+  photoPath     String?
+  photoMimeType String?
+  createdById   String
+  createdBy     User      @relation("LabelCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  categories Category[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  labelId     String
+  label       Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  createdById String
+  createdBy   User     @relation("CategoryCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documents Document[]
+
+  @@unique([labelId, name])
+}
+
+model Document {
+  id             String   @id @default(cuid())
+  categoryId     String
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  originalName   String
+  storedFileName String   @unique
+  mimeType       String
+  sizeBytes      Int
+  filePath       String
+  uploadedById   String
+  uploadedBy     User     @relation("DocumentUploadedBy", fields: [uploadedById], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model QualityDocument {
+  id                 String              @id @default(cuid())
+  type               QualityDocumentType
+  title              String
+  originalName       String
+  storedFileName     String              @unique
+  mimeType           String
+  sizeBytes          Int
+  filePath           String
+  active             Boolean             @default(true)
+  approvalStatus     ApprovalStatus      @default(APROVADO)
+  currentApproverId  String?
+  currentRequesterId String?
+  uploadedById       String
+  uploadedBy         User                @relation("QualityDocumentUploadedBy", fields: [uploadedById], references: [id])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  approvalFlows DocumentApprovalFlow[]
+  historyEvents DocumentApprovalHistoryEvent[]
+
+  @@index([type])
+  @@index([approvalStatus])
+  @@index([currentApproverId])
+  @@index([currentRequesterId])
+}
+
+model DocumentApprovalFlow {
+  id                String          @id @default(cuid())
+  qualityDocumentId String
+  qualityDocument   QualityDocument @relation(fields: [qualityDocumentId], references: [id], onDelete: Cascade)
+  cycleNumber       Int
+  status            ApprovalStatus
+  approverId        String
+  approver          User            @relation("ApprovalFlowApprover", fields: [approverId], references: [id])
+  requesterId       String
+  requester         User            @relation("ApprovalFlowRequester", fields: [requesterId], references: [id])
+  requesterNote     String?         @db.Text
+  approverNote      String?         @db.Text
+  requestedAt       DateTime        @default(now())
+  decidedAt         DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([qualityDocumentId, cycleNumber])
+}
+
+model DocumentApprovalHistoryEvent {
+  id                String                    @id @default(cuid())
+  qualityDocumentId String
+  qualityDocument   QualityDocument           @relation(fields: [qualityDocumentId], references: [id], onDelete: Cascade)
+  cycleNumber       Int
+  eventType         DocumentApprovalEventType
+  userId            String
+  user              User                      @relation("ApprovalHistoryActor", fields: [userId], references: [id])
+  approverId        String
+  approver          User                      @relation("ApprovalHistoryApprover", fields: [approverId], references: [id])
+  note              String?                   @db.Text
+  createdAt         DateTime                  @default(now())
+
+  @@index([qualityDocumentId, cycleNumber])
+}
+
+model EmailJob {
+  id            String         @id @default(cuid())
+  type          String
+  payload       Json
+  status        EmailJobStatus @default(PENDING)
+  attempts      Int            @default(0)
+  lastError     String?        @db.Text
+  nextAttemptAt DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status, nextAttemptAt])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+}
+
+// Linha unica de configuracoes globais do sistema (id fixo "singleton").
+model AppSettings {
+  id           String   @id
+  logoPath     String?
+  logoMimeType String?
+  headerColor  String   @default("#005596")
+  updatedAt    DateTime @updatedAt
+}
