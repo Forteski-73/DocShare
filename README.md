@@ -144,5 +144,5 @@ Ele empacota `backend/` e `frontend/`, envia para o servidor, reinstala dependê
 ### Observações de segurança
 
 - O `.env` de produção nunca é commitado nem gerado a partir do `.env` local — é criado direto no servidor
-- A senha do usuário admin padrão (`admin123`, se você usou o seed) deve ser trocada após o primeiro login em produção
+- A senha do usuário admin padrão deve ser trocada após o primeiro login em produção
 - Segredos (JWT, senha do banco, senha SMTP) são únicos de produção, diferentes dos valores de desenvolvimento
