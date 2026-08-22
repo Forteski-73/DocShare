@@ -2,8 +2,6 @@
 
 Portal interno para organizar documentos por Produto (**Label**) → **Categoria** → **Documento**, com controle de acesso por perfil (Admin / Editor / Leitor) e fluxo de convite por e-mail.
 
-Status atual: em produção em [https://docshare.tech](https://docshare.tech) (VPS Hostinger), com ambiente de desenvolvimento local também disponível.
-
 ## Stack
 
 - **Frontend**: React + Vite + TypeScript + Mantine
