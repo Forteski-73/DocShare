@@ -3,8 +3,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { env } from "./config/env";
 import { apiRoutes } from "./routes";
+import { swaggerSpec } from "./config/swagger";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 export const app = express();
@@ -13,6 +15,12 @@ export const app = express();
 // Sem isso, express-rate-limit rejeita o header X-Forwarded-For por seguranca.
 if (env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
+}
+
+// Registrado antes do Helmet: o CSP padrao do Helmet bloqueia os scripts/estilos
+// inline que o swagger-ui-express usa. So disponivel fora de producao.
+if (env.NODE_ENV !== "production") {
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }
 
 app.use(
