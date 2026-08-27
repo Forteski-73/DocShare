@@ -4,14 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Alert,
+  Anchor,
   Button,
   Center,
+  Image,
   Paper,
   PasswordInput,
   Stack,
   Text,
   TextInput,
-  Title,
 } from "@mantine/core";
 import { useAuth } from "../../hooks/useAuth";
 import { loginSchema, type LoginFormValues } from "../../schemas/authSchemas";
@@ -46,17 +47,14 @@ export function LoginPage() {
   return (
     <Center h="100vh">
       <Paper withBorder shadow="md" p="xl" w={380} radius="md">
-        <Title order={2} mb="xs">
-          DocShare
-        </Title>
-        <Text c="dimmed" size="sm" mb="lg">
-          Entre com seu e-mail ou cracha
-        </Text>
+        <Center mb={18}>
+          <Image src="/logo-doc-share.png" alt="DocShare" w="100%" maw={288} fit="contain" />
+        </Center>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack>
             {error && <Alert color="red">{error}</Alert>}
             <TextInput
-              label="E-mail ou cracha"
+              label="E-mail ou Crachá"
               placeholder="seu.email@empresa.com"
               {...register("identifier")}
               error={errors.identifier?.message}
@@ -72,7 +70,9 @@ export function LoginPage() {
               Entrar
             </Button>
             <Text ta="center" size="sm">
-              <Link to="/esqueci-senha">Esqueci minha senha</Link>
+              <Anchor component={Link} to="/esqueci-senha" c="#044B88" td="none">
+                Esqueci minha senha
+              </Anchor>
             </Text>
           </Stack>
         </form>

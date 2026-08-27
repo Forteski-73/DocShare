@@ -8,7 +8,6 @@ import {
   Menu,
   NavLink,
   Text,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -35,7 +34,7 @@ import { ProfileAvatarModal } from "../users/ProfileAvatarModal";
 import { BackToTopButton } from "../ui/BackToTopButton";
 
 export function AppLayout() {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure();
   const [avatarModalOpened, setAvatarModalOpened] = useState(false);
   const { user, logout, refresh } = useAuth();
   const navigate = useNavigate();
@@ -73,6 +72,11 @@ export function AppLayout() {
     navigate("/login");
   }
 
+  function handleNavigate(path: string) {
+    navigate(path);
+    close();
+  }
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -98,9 +102,7 @@ export function AppLayout() {
                 alt="Logo"
               />
             ) : (
-              <Title order={4} c={headerTextColor}>
-                DocShare
-              </Title>
+              <Image src="/logo-doc-share.png" alt="DocShare" h={36} w="auto" fit="contain" />
             )}
           </Group>
 
@@ -154,17 +156,17 @@ export function AppLayout() {
           <NavLink
             label="Piso Laminado"
             active={location.pathname.startsWith("/produtos/piso-laminado")}
-            onClick={() => navigate("/produtos/piso-laminado")}
+            onClick={() => handleNavigate("/produtos/piso-laminado")}
           />
           <NavLink
             label="Acessório"
             active={location.pathname.startsWith("/produtos/acessorio")}
-            onClick={() => navigate("/produtos/acessorio")}
+            onClick={() => handleNavigate("/produtos/acessorio")}
           />
           <NavLink
             label="Documentos"
             active={location.pathname.startsWith("/produtos/documento")}
-            onClick={() => navigate("/produtos/documento")}
+            onClick={() => handleNavigate("/produtos/documento")}
           />
         </NavLink>
 
@@ -177,18 +179,18 @@ export function AppLayout() {
           <NavLink
             label="Formulários"
             active={location.pathname.startsWith("/qualidade/formularios")}
-            onClick={() => navigate("/qualidade/formularios")}
+            onClick={() => handleNavigate("/qualidade/formularios")}
           />
           <NavLink
             label="Procedimentos Internos"
             active={location.pathname.startsWith("/qualidade/procedimentos-internos")}
-            onClick={() => navigate("/qualidade/procedimentos-internos")}
+            onClick={() => handleNavigate("/qualidade/procedimentos-internos")}
           />
           {(user?.role === "APPROVER" || user?.role === "ADMIN") && (
             <NavLink
               label="Aprovações Pendentes"
               active={location.pathname === "/qualidade/aprovacoes"}
-              onClick={() => navigate("/qualidade/aprovacoes")}
+              onClick={() => handleNavigate("/qualidade/aprovacoes")}
             />
           )}
         </NavLink>
@@ -199,25 +201,25 @@ export function AppLayout() {
               label="Documentos"
               leftSection={<IconFileText size={16} />}
               active={location.pathname.startsWith("/admin/documentos")}
-              onClick={() => navigate("/admin/documentos")}
+              onClick={() => handleNavigate("/admin/documentos")}
             />
             <NavLink
               label="Atividades"
               leftSection={<IconHistory size={16} />}
               active={location.pathname.startsWith("/admin/atividades")}
-              onClick={() => navigate("/admin/atividades")}
+              onClick={() => handleNavigate("/admin/atividades")}
             />
             <NavLink
               label="Usuários"
               leftSection={<IconUsers size={16} />}
               active={location.pathname.startsWith("/admin/usuarios")}
-              onClick={() => navigate("/admin/usuarios")}
+              onClick={() => handleNavigate("/admin/usuarios")}
             />
             <NavLink
               label="Configurações"
               leftSection={<IconSettings size={16} />}
               active={location.pathname.startsWith("/admin/configuracoes")}
-              onClick={() => navigate("/admin/configuracoes")}
+              onClick={() => handleNavigate("/admin/configuracoes")}
             />
           </>
         )}
