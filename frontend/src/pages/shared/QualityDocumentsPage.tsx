@@ -48,6 +48,7 @@ export function QualityDocumentsPage() {
   const typeDisplayName = qualityDocumentTypeDisplayName(type);
   const { user } = useAuth();
   const canManage = useCanManageContent();
+  const isReader = user?.role === "READER";
   const queryClient = useQueryClient();
 
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "inactive">("active");
@@ -55,10 +56,10 @@ export function QualityDocumentsPage() {
   const [resubmittingDocument, setResubmittingDocument] = useState<QualityDocument | null>(null);
   const [deletingDocument, setDeletingDocument] = useState<QualityDocument | null>(null);
 
-  const active = activeFilter === "all" ? undefined : activeFilter === "active";
+  const active = isReader ? true : activeFilter === "all" ? undefined : activeFilter === "active";
 
   const { data: documents, isLoading } = useQuery({
-    queryKey: ["quality-documents", type, activeFilter],
+    queryKey: ["quality-documents", type, isReader ? "reader" : activeFilter],
     queryFn: () => qualityDocumentsService.list({ type, active }),
   });
 
@@ -140,16 +141,18 @@ export function QualityDocumentsPage() {
         )}
       </Group>
 
-      <SegmentedControl
-        value={activeFilter}
-        onChange={(value) => setActiveFilter(value as "all" | "active" | "inactive")}
-        data={[
-          { label: "Ativos", value: "active" },
-          { label: "Inativos", value: "inactive" },
-          { label: "Todos", value: "all" },
-        ]}
-        maw={320}
-      />
+      {!isReader && (
+        <SegmentedControl
+          value={activeFilter}
+          onChange={(value) => setActiveFilter(value as "all" | "active" | "inactive")}
+          data={[
+            { label: "Ativos", value: "active" },
+            { label: "Inativos", value: "inactive" },
+            { label: "Todos", value: "all" },
+          ]}
+          maw={320}
+        />
+      )}
 
       {isLoading || !documents ? (
         <Loader />

@@ -34,12 +34,14 @@ function visibilityWhere(ctx: VisibilityContext) {
 function isVisible(
   document: {
     approvalStatus: ApprovalStatus;
+    active: boolean;
     currentRequesterId: string | null;
     currentApproverId: string | null;
   },
   ctx: VisibilityContext
 ) {
   if (ctx.role === "ADMIN") return true;
+  if (ctx.role === "READER") return document.approvalStatus === "APROVADO" && document.active;
   if (document.approvalStatus === "APROVADO") return true;
   return document.currentRequesterId === ctx.userId || document.currentApproverId === ctx.userId;
 }
@@ -73,6 +75,14 @@ export async function list(
   filters: { type: QualityDocumentType; active?: boolean },
   ctx: VisibilityContext
 ) {
+  if (ctx.role === "READER") {
+    return prisma.qualityDocument.findMany({
+      where: { type: filters.type, active: true, approvalStatus: "APROVADO" },
+      include: QUALITY_DOCUMENT_INCLUDE,
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   return prisma.qualityDocument.findMany({
     where: {
       type: filters.type,
