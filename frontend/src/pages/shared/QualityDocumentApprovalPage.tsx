@@ -195,7 +195,7 @@ export function QualityDocumentApprovalPage() {
             <Title order={4}>Decisão</Title>
             <Textarea
               label="Observação do aprovador"
-              description="Obrigatória ao não aprovar, opcional ao aprovar"
+              description="Obrigatório para REPROVAR, opcional ao APROVAR"
               value={approverNote}
               onChange={(event) => setApproverNote(event.currentTarget.value)}
               autosize
@@ -228,7 +228,7 @@ export function QualityDocumentApprovalPage() {
                   decideMutation.mutate({ decision: "REPROVAR", approverNote: approverNote.trim() });
                 }}
               >
-                Não Aprovar
+                Reprovar
               </Button>
             </Group>
           </Stack>
