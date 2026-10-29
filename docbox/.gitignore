@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+
+# certificado local (especifico desta maquina/rede corporativa)
+.kaspersky-ca.pem
+
+# uploads (arquivos enviados pelos usuarios)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# prisma
+backend/prisma/dev.db
+
+# logs
+npm-debug.log*
+*.log
+
+# editor/OS
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
