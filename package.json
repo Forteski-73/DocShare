@@ -1,0 +1,12 @@
+{
+  "name": "docshare",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal interno de gestao de documentos por produto",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}
